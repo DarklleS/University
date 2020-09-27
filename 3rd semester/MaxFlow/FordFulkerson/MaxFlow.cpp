@@ -37,7 +37,6 @@ int fordFulkerson(const vector<vector<int>>& matrix, int s, int t)
     vector<int> parent(matrix.size());
     int maxFlow = 0;
 
-
     while (BFS(rMatrix, s, t, parent))
     {
         int pathFlow = INT_MAX;
@@ -78,6 +77,12 @@ int main()
     for (size_t i = 0; i < size; ++i)
         for (size_t j = 0; j < size; ++j)
             fin >> matrix[i][j];
-
+    
+    fout << fordFulkerson(matrix, 0, 1);
     cout << "Max Flow: " << fordFulkerson(matrix, 0, 1);
+    
+    fin.close();
+    fout.close();
+    
+    return 0;
 }
