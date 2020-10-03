@@ -1,14 +1,14 @@
-﻿#include <iostream>
+#include <iostream>
 #include <list>
 #include <fstream>
-#include <algorithm>
 
 using namespace std;
 
-class Point2D // Реализация класса "Point2D" | Задача 1.1.
+class Point2D // Класс реализации структуры "Point2D" 
 {
 private:
-	int x, y;
+	int x;
+	int y;
 	double distance;
 
 public:
@@ -20,7 +20,7 @@ public:
 	Point2D(int x, int y) :
 		x(x),
 		y(y),
-		distance(sqrt(x* x + y * y)) {}
+		distance(sqrt(x * x + y * y)) {}
 
 	int getX() { return this->x; }
 	int getY() { return this->y; }
@@ -35,21 +35,24 @@ public:
 	friend ostream& operator<< (ostream& ustream, Point2D& obj);
 };
 
-ostream& operator<< (ostream& ustream, Point2D& obj)
+ostream& operator<< (ostream& ustream, Point2D& obj) // Вывод объекта класса Point2D
 {
 	if (&obj)
 		cout << "X:\t\t" << obj.getX() << endl
-			 << "Y:\t\t" << obj.getY() << endl
-			 << "Distance:\t" << obj.getDistance() << endl;
+		     << "Y:\t\t" << obj.getY() << endl
+		     << "Distance:\t" << obj.getDistance() << endl;
 
 	return ustream;
 }
 
-class State // Реализация класса "Государство" | Задача 1.2.
+class State // Класс реализации структуры "Государство" 
 {
 private:
-	string name, capital, language;
-	unsigned population, area;
+	string name;
+	string capital;
+	string language;
+	unsigned population;
+	unsigned area;
 
 public:
 	State() :
@@ -75,50 +78,50 @@ public:
 	bool operator ==(const State& temp) { return this->population == temp.population && this->area == temp.area && this->name == temp.name; }
 
 	bool operator >(const State& temp)
-	{ 
+	{
 		return this->population != temp.population ? this->population > temp.population :
-			   this->area != temp.area ? this->area > temp.area :
-			   this->name != temp.name ? this->name < temp.name : false;
+		       this->area != temp.area ? this->area > temp.area :
+		       this->name != temp.name ? this->name < temp.name : false;
 	}
 
 	bool operator <(const State& temp)
 	{
 		return this->population != temp.population ? this->population < temp.population :
-			   this->area != temp.area ? this->area < temp.area :
-			   this->name != temp.name ? this->name > temp.name : false;
+		       this->area != temp.area ? this->area < temp.area :
+		       this->name != temp.name ? this->name > temp.name : false;
 	}
 
 	bool operator >=(const State& temp)
 	{
 		return !(this->population < temp.population) ? (this->population > temp.population) || (this->population == temp.population) :
-			   !(this->area < temp.area) ? (this->area > temp.area) || (this->area == temp.area) :
-			   !(this->name < temp.name) ? (this->name < temp.name) || (this->name == temp.name) : false;
+		       !(this->area < temp.area) ? (this->area > temp.area) || (this->area == temp.area) :
+		       !(this->name < temp.name) ? (this->name < temp.name) || (this->name == temp.name) : false;
 	}
 
 	bool operator <=(const State& temp)
 	{
 		return !(this->population > temp.population) ? (this->population < temp.population) || (this->population == temp.population) :
-			   !(this->area > temp.area) ? (this->area < temp.area) || (this->area == temp.area) :
-			   !(this->name > temp.name) ? (this->name > temp.name) || (this->name == temp.name) : false;
+		       !(this->area > temp.area) ? (this->area < temp.area) || (this->area == temp.area) :
+		       !(this->name > temp.name) ? (this->name > temp.name) || (this->name == temp.name) : false;
 	}
 
 	friend ostream& operator<< (ostream& ustream, State& obj);
 };
 
-ostream& operator<< (ostream& ustream, State& obj)
+ostream& operator<< (ostream& ustream, State& obj) // Вывод объекта класса State
 {
 	if (&obj)
 		cout << "State:\t\t" << obj.name << endl
-			 << "Capital:\t" << obj.capital << endl
-			 << "Language:\t" << obj.language << endl
-			 << "Population:\t" << obj.population << endl
-			 << "Area:\t\t" << obj.area << endl;
+		     << "Capital:\t" << obj.capital << endl
+		     << "Language:\t" << obj.language << endl
+		     << "Population:\t" << obj.population << endl
+		     << "Area:\t\t" << obj.area << endl;
 
 	return ustream;
 }
 
 template <class T>
-class Element
+class Element // Класс реализации узла списка
 {
 private:
 	Element* next;
@@ -142,15 +145,15 @@ public:
 };
 
 template<class T>
-ostream& operator<< (ostream& ustream, Element<T>& obj)
+ostream& operator<< (ostream& ustream, Element<T>& obj) // Вывод узла списка
 {
-	if(&obj)
+	if (&obj)
 		ustream << obj.field;
 	return ustream;
 }
 
 template <class T>
-class LinkedListParent
+class LinkedListParent // Абсрактный класс списка
 {
 protected:
 	Element<T>* head;
@@ -174,7 +177,7 @@ public:
 
 	virtual Element<T>* operator[](int i)
 	{
-		if (i < 0 || i > num) 
+		if (i < 0 || i > num)
 			return nullptr;
 
 		Element<T>* cur = head;
@@ -190,7 +193,7 @@ public:
 };
 
 template<typename ValueType>
-class ListIterator : public std::iterator<std::input_iterator_tag, ValueType>
+class ListIterator : public std::iterator<std::input_iterator_tag, ValueType> // Класс реализации итератора списка
 {
 private:
 	Element<ValueType>* ptr;
@@ -210,7 +213,7 @@ public:
 
 	Element<ValueType>& operator*() { return ptr ? *ptr : nullptr; }
 
-	ListIterator& operator++() 
+	ListIterator& operator++()
 	{
 		if (ptr && ptr->getNext())
 			ptr = ptr->getNext();
@@ -242,7 +245,7 @@ public:
 };
 
 template <class T>
-class IteratedLinkedList : public LinkedListParent<T>
+class IteratedLinkedList : public LinkedListParent<T> // Класс реализации итерационного списка
 {
 public:
 	IteratedLinkedList() : LinkedListParent<T>() {}
@@ -258,7 +261,7 @@ public:
 };
 
 template<class T>
-ostream& operator << (ostream& ustream, IteratedLinkedList<T>& obj)
+ostream& operator << (ostream& ustream, IteratedLinkedList<T>& obj) // Вывод итерационного списка
 {
 	ListIterator<T> it = obj.getBegin();
 	size_t i = 0;
@@ -296,7 +299,7 @@ ostream& operator << (ostream& ustream, IteratedLinkedList<T>& obj)
 			ustream << "Element " << i + 1 << ":" << endl;
 			ustream << temp;
 
-			if(i < obj.getNumber() - 1)
+			if (i < obj.getNumber() - 1)
 				cout << "------------------------------" << endl;
 		}
 	}
@@ -305,7 +308,7 @@ ostream& operator << (ostream& ustream, IteratedLinkedList<T>& obj)
 }
 
 template<class T>
-istream& operator >> (istream& ustream, IteratedLinkedList<T>& obj)
+istream& operator >> (istream& ustream, IteratedLinkedList<T>& obj) // Ввод  итерационного списка
 {
 	int len;
 	ustream >> len;
@@ -320,17 +323,17 @@ istream& operator >> (istream& ustream, IteratedLinkedList<T>& obj)
 }
 
 template <class T>
-class Stack : public IteratedLinkedList<T>
+class Stack : public IteratedLinkedList<T> // Класс реализации стека
 {
 public:
 	Stack() : IteratedLinkedList<T>() {}
 
-	virtual Element<T>* pop()
+	virtual Element<T>* pop() // Метод удаления элемента из стека
 	{
-		if (!LinkedListParent<T>::tail)
+		if (!LinkedListParent<T>::tail) // Если стек пустой
 			return nullptr;
 
-		if (LinkedListParent<T>::num == 1)
+		if (LinkedListParent<T>::num == 1) // Если в стеке находится только 1 элемент
 			LinkedListParent<T>::head = LinkedListParent<T>::tail = nullptr;
 		else
 		{
@@ -345,11 +348,11 @@ public:
 		return LinkedListParent<T>::tail;
 	}
 
-	virtual Element<T>* push(T value)
+	virtual Element<T>* push(T value) // Метод добавления элемента в стек
 	{
 		Element<T>* newElem = new Element<T>(value);
 
-		if (!LinkedListParent<T>::tail)
+		if (!LinkedListParent<T>::tail) // Если стек пустой
 			LinkedListParent<T>::tail = LinkedListParent<T>::head = newElem;
 		else
 		{
@@ -363,29 +366,29 @@ public:
 		return newElem;
 	}
 
-	virtual Element<T>* top() { return LinkedListParent<T>::tail; }
+	virtual Element<T>* top() { return LinkedListParent<T>::tail; } // Метод взятия верхнего элемента стека
 };
 
 template <class T>
-class SortedStack : public Stack<T>
+class SortedStack : public Stack<T> // Класс реализация сортированного стека
 {
 public:
 	SortedStack() : Stack<T>() {}
 
-	virtual Element<T>* push(T value)
+	virtual Element<T>* push(T value) // Переопределение метода добавление элемента в стек
 	{
 		Element<T>* newElem = new Element<T>(value);
 		Element<T>* current = LinkedListParent<T>::head;
 
-		if (!LinkedListParent<T>::tail)
+		if (!LinkedListParent<T>::tail) // Если стек пустой
 			LinkedListParent<T>::tail = LinkedListParent<T>::head = newElem;
-		else if (value < LinkedListParent<T>::head->getValue())
+		else if (value < LinkedListParent<T>::head->getValue()) // Если добавляемый элемент меньше чем первый элемент
 		{
 			LinkedListParent<T>::head->setPrevious(newElem);
 			newElem->setNext(LinkedListParent<T>::head);
 			LinkedListParent<T>::head = newElem;
 		}
-		else if (value > LinkedListParent<T>::tail->getValue())
+		else if (value > LinkedListParent<T>::tail->getValue()) // Если добавляемый элемент больше чем последний элемент
 		{
 			LinkedListParent<T>::tail->setNext(newElem);
 			newElem->setPrevious(LinkedListParent<T>::tail);
@@ -395,7 +398,7 @@ public:
 		{
 			while (current != LinkedListParent<T>::tail)
 			{
-				if (value > current->getValue() && value <= current->getNext()->getValue())
+				if (value > current->getValue() && value <= current->getNext()->getValue()) // Если добавляемый элемент больше текушего и меньше либо равен текущему
 				{
 					newElem->setNext(current->getNext());
 					current->setNext(newElem);
@@ -421,7 +424,7 @@ void push(list<T>& l, T& const newTemp) // Функция добавления �
 	auto it = l.cbegin();
 
 	for (; it != l.cend(); ++it)
-		if (newTemp > *it)
+		if (newTemp > * it)
 		{
 			l.insert(it, newTemp);
 			return;
@@ -442,9 +445,9 @@ void pop(list<T>& l, T& const deleteTemp) // Функция удаления э�
 }
 
 bool inSquare(Point2D& const point) // Предикат проверки нахождения объекта класса Point2D в единичном квадрате
-{ 
+{
 	return point.getX() >= 0 && point.getX() <= 1 &&
-		   point.getY() >= 0 && point.getY() <= 1; 
+		point.getY() >= 0 && point.getY() <= 1;
 }
 
 list<Point2D> filter(list<Point2D>& l, bool (*f)(Point2D& const)) // Функция перезаписи списка с элементами класса Point2D, которые лежат в единичном квадрате
@@ -460,39 +463,39 @@ list<Point2D> filter(list<Point2D>& l, bool (*f)(Point2D& const)) // Функц�
 
 void printPoint(const list<Point2D>& l) // Вывод объекта класса Point2D
 {
-	int i = 1;
+	int index = 1;
 
 	for (auto it : l)
 	{
-		cout << "Point " << i << ":" << endl
-			 << "X:\t\t" << it.getX() << endl
-			 << "Y:\t\t" << it.getY() << endl
-			 << "Distance:\t" << it.getDistance() << endl;
+		cout << "Point " << index << ":" << endl
+		     << "X:\t\t" << it.getX() << endl
+		     << "Y:\t\t" << it.getY() << endl
+		     << "Distance:\t" << it.getDistance() << endl;
 
-		if (i != l.size())
+		if (index != l.size())
 			cout << "------------------------------" << endl;
-		
-		i++;
+
+		index++;
 	}
 }
 
 void printState(const list<State>& l) // Вывод объекта класса State
 {
-	int i = 1;
+	int index = 1;
 
 	for (auto it : l)
 	{
-		cout << "State " << i << ":" << endl
-			 << "Name:\t\t" << it.getName() << endl
-			 << "Capital:\t" << it.getCapital() << endl
-			 << "Language:\t" << it.getLanguage() << endl
-			 << "Population:\t" << it.getPopulation() << endl
+		cout << "State " << index << ":" << endl
+		     << "Name:\t\t" << it.getName() << endl
+		     << "Capital:\t" << it.getCapital() << endl
+		     << "Language:\t" << it.getLanguage() << endl
+		     << "Population:\t" << it.getPopulation() << endl
 		     << "Area:\t\t" << it.getArea() << endl;
 
-		if (i != l.size())
+		if (index != l.size())
 			cout << "------------------------------" << endl;
 
-		i++;
+		index++;
 	}
 }
 
@@ -554,12 +557,12 @@ int main()
 	State S5("Japan", "Tokyo", "Japanese", 126, 377);
 	State S6("China", "Beijing", "Chinese", 1393, 9597);
 
-	push(states, S1);
-	push(states, S2);
-	push(states, S3);
-	push(states, S4);
-	push(states, S5);
-	push(states, S6);
+	push(states, S1); // Russia
+	push(states, S2); // France
+	push(states, S3); // USA
+	push(states, S4); // Germany
+	push(states, S5); // Japan
+	push(states, S6); // China
 
 	cout << endl;
 
