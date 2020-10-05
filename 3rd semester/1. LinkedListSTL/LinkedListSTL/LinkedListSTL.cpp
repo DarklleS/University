@@ -251,8 +251,6 @@ public:
 	IteratedLinkedList() : LinkedListParent<T>() {}
 	virtual ~IteratedLinkedList() {}
 
-	ListIterator<T> iterator;
-
 	ListIterator<T> begin() { ListIterator<T> it = LinkedListParent<T>::head; return it; }
 	ListIterator<T> end() { ListIterator<T> it = LinkedListParent<T>::tail; return it; }
 
@@ -311,14 +309,16 @@ template<class T>
 istream& operator >> (istream& ustream, IteratedLinkedList<T>& obj) // Ввод  итерационного списка
 {
 	int len;
-	ustream >> len;
-
 	double v = 0;
+	
+	ustream >> len;
+	
 	for (int i = 0; i < len; i++)
 	{
 		ustream >> v;
 		obj.push(v);
 	}
+	
 	return ustream;
 }
 
@@ -398,7 +398,8 @@ public:
 		{
 			while (current != LinkedListParent<T>::tail)
 			{
-				if (value > current->getValue() && value <= current->getNext()->getValue()) // Если добавляемый элемент больше текушего и меньше либо равен текущему
+				if (value > current->getValue() && value <= current->getNext()->getValue())
+				// Если добавляемый элемент больше текушего и меньше либо равен следующему элементу текущего
 				{
 					newElem->setNext(current->getNext());
 					current->setNext(newElem);
