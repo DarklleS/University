@@ -59,7 +59,7 @@ public:
 
 			if (key < current->data && current->left)
 				current = current->left;
-			else if (key > current->data&& current->right)
+			else if (key > current->data && current->right)
 				current = current->right;
 			else
 				return nullptr;
