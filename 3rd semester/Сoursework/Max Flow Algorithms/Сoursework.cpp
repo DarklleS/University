@@ -43,7 +43,7 @@ struct Edge
 template<class T> 
 ostream& operator<< (ostream& ustream, const Edge<T>& obj)
 {
-    ustream << obj.weight;
+    ustream << obj.capacity;
 
     return ustream;
 }
@@ -51,7 +51,7 @@ ostream& operator<< (ostream& ustream, const Edge<T>& obj)
 template<class T>
 istream& operator>> (istream& ustream, Edge<T>& obj)
 {
-    ustream >> obj.source >> obj.target >> obj.weight;
+    ustream >> obj.source >> obj.target >> obj.capacity;
 
     return ustream;
 }
