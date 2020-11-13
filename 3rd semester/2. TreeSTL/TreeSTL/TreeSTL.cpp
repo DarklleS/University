@@ -603,7 +603,7 @@ protected:
 };
 
 template<typename T>
-class TreeIterator : public iterator<input_iterator_tag, T>
+class TreeIterator : public iterator<input_iterator_tag, T> // Класс реализации итератора дерева
 {
 public:
 	TreeIterator() :
@@ -675,7 +675,7 @@ private:
 };
 
 template<class T>
-class IteratedTree : public AVL_Tree<T>, public TreeIterator<T>
+class IteratedTree : public AVL_Tree<T> // Класс реализации интегрированного дерева
 {
 public:
 	IteratedTree() : AVL_Tree<T>() {}
