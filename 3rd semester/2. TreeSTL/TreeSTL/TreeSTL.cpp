@@ -1,4 +1,4 @@
-﻿#include <iostream>
+#include <iostream>
 #include <vector>
 #include <list>
 #include <map>
@@ -65,7 +65,7 @@ map<K, V> filter(const map<K, V>& inputMap, bool (*f)(const V&)) // Функци
     return newMap;
 }
 
-template<typename K, typename V>
+template<typename K, typename V> 
 class MapPriorityQueue // Класс реализации очереди с приоритетом
 {
 public:
@@ -164,14 +164,73 @@ public:
         cout << endl;
     }
 
-    pair<K, V>* top() { return &_q.front(); }
+    const pair<K, V>* top() { return &_q.front(); }
 
 private:
 	list<pair<K, V>> _q;
 };
 
+class State // Класс реализации структуры "Государство" 
+{
+public:
+	State() :
+		_name("NaN"),
+		_capital("NaN"),
+		_language("NaN"),
+		_population(0),
+		_area(0) {}
+
+	State(string name, string capital, string language, unsigned population, unsigned area) :
+		_name(name),
+		_capital(capital),
+		_language(language),
+		_population(population),
+		_area(area) {}
+
+	string getName() { return _name; }
+	string getCapital() { return _capital; }
+	string getLanguage() { return _language; }
+	unsigned getPopulation() { return _population; }
+	unsigned getArea() { return _area; }
+
+	bool operator==(const State& temp) { return _name == temp._name; }
+
+	bool operator!=(const State& temp) { return _name != temp._name; }
+
+	bool operator>(const State& temp) { return _name < temp._name; }
+
+	bool operator<(const State& temp) { return _name > temp._name; }
+
+	bool operator>=(const State& temp) { return _name <= temp._name; }
+
+	bool operator<=(const State& temp) { return _name >= temp._name; }
+
+	friend ostream& operator<<(ostream& ustream, State& obj);
+
+private:
+	string _name;
+	string _capital;
+	string _language;
+	unsigned _population;
+	unsigned _area;
+};
+
+ostream& operator<<(ostream& ustream, State& obj) // Вывод объекта класса State
+{
+	if (&obj)
+	{
+		cout << "State:\t\t" << obj._name << endl
+			<< "Capital:\t" << obj._capital << endl
+			<< "Language:\t" << obj._language << endl
+			<< "Population:\t" << obj._population << endl
+			<< "Area:\t\t" << obj._area << endl;
+	}
+
+	return ustream;
+}
+
 template<class T>
-struct Node
+struct Node // Структура реализации узла бирного дерева 
 {
 	Node<T>* left;
 	Node<T>* right;
@@ -195,7 +254,7 @@ struct Node
 };
 
 template<class T>
-class AVL_Tree
+class AVL_Tree // Класс реализации АВЛ дерева
 {
 public:
 	AVL_Tree() : _root(nullptr) {}
@@ -239,6 +298,10 @@ public:
 
 	void postorder() { _postorder(_root); }
 
+	Node<T>* successor(Node<T>* node) { return _successor(node); }
+
+	Node<T>* predcessor(Node<T>* node) { return _predcessor(node); }
+
 protected:
 	Node<T>* _root;
 
@@ -255,7 +318,7 @@ protected:
 			current->left = _insert(current->left, node);
 			current->left->parent = current;
 		}
-		else if (node->data > current->data && current)
+		else if (node->data > current->data&& current)
 		{
 			current->right = _insert(current->right, node);
 			current->right->parent = current;
@@ -491,11 +554,56 @@ protected:
 
 		return node;
 	}
+
+	Node<T>* _successor(Node<T>* node)
+	{
+		if (!node)
+			return nullptr;
+
+		if (node->right)
+			return _min(node->right);
+		else
+		{
+			Node<T>* successor = nullptr;
+			Node<T>* ancestor = _root;
+
+			while (ancestor != node)
+			{
+				if (node->data < ancestor->data)
+				{
+					successor = ancestor;
+					ancestor = ancestor->left;
+				}
+				else
+					ancestor = ancestor->right;
+			}
+
+			return successor;
+		}
+	}
+
+	Node<T>* _predcessor(Node<T>* node)
+	{
+		Node<T>* temp = node;
+
+		if (!node)
+			return nullptr;
+		else if (node == _root && !node->left)
+			return nullptr;
+		else if (node->left)
+			return _max(node->left);
+		else
+		{
+			while (temp->parent && temp->parent->right != temp)
+				temp = temp->parent;
+
+			return temp->parent;
+		}
+	}
 };
 
-
 template<typename T>
-class TreeIterator : public std::iterator<std::input_iterator_tag, T>
+class TreeIterator : public iterator<input_iterator_tag, T>
 {
 public:
 	TreeIterator() :
@@ -510,13 +618,20 @@ public:
 		_node(i._node),
 		_tree(i._tree) {}
 
-	TreeIterator& operator=(const TreeIterator& i) 
+	TreeIterator<T>& operator=(const TreeIterator& i) 
 	{
 		_node = i._node;
 		_tree = i._tree;
+
+		return *this;
 	}
 
-	TreeIterator<T>& operator=(Node<T>* temp) { _node = temp; }
+	TreeIterator<T>& operator=(Node<T>* temp) 
+	{
+		_node = temp;
+
+		return *this;
+	}
 
 	bool operator!=(const TreeIterator<T> const& other) const { return _node != other._node; }
 
@@ -524,40 +639,35 @@ public:
 
 	bool operator!() const { return !_node; }
 
-	Node<T>& operator*() const { return _node; }
+	Node<T>& operator*() const { return *(_node); }
 
 	TreeIterator<T>& operator++()
 	{
-		if (_node->right)
-			_node = _tree->min(_node->right);
+		_node = _tree->successor(_node);
 
 		return *this;
 	}
 
 	TreeIterator<T>& operator++(int temp)
 	{
-		if (_node->right)
-			_node = _tree->min(_node->right);
+		_node = _tree->successor(_node);
 
 		return *this;
 	}
 
 	TreeIterator<T>& operator--()
 	{ 
-		if (_node->right)
-			_node = _tree->max(_node->left);
+		_node = _tree->predcessor(_node);
 
 		return *this;
 	}
 
 	TreeIterator<T>& operator--(int temp)
 	{
-		if (_node->right)
-			_node = _tree->max(_node->left);
+		_node = _tree->predcessor(_node);
 
 		return *this;
 	}
-
 
 private:
 	Node<T>* _node;
@@ -565,95 +675,45 @@ private:
 };
 
 template<class T>
-class IteratedTree : public AVL_Tree<T>
+class IteratedTree : public AVL_Tree<T>, public TreeIterator<T>
 {
 public:
-	IteratedTree<T>() : AVL_Tree<T>() {}
+	IteratedTree() : AVL_Tree<T>() {}
 
-	TreeIterator<T> begin() { auto it = TreeIterator<T>(this, this->min()); }
-	TreeIterator<T> end() { auto it = TreeIterator<T>(this, this->max()); }
-};
+	IteratedTree(const AVL_Tree<T>& tree) { this->_root = tree._root; }
 
-class State // Класс реализации структуры "Государство" 
-{
-public:
-	State() :
-		_name("NaN"),
-		_capital("NaN"),
-		_language("NaN"),
-		_population(0),
-		_area(0) {}
-
-	State(string name, string capital, string language, unsigned population, unsigned area) :
-		_name(name),
-		_capital(capital),
-		_language(language),
-		_population(population),
-		_area(area) {}
-
-	string getName() { return _name; }
-	string getCapital() { return _capital; }
-	string getLanguage() { return _language; }
-	unsigned getPopulation() { return _population; }
-	unsigned getArea() { return _area; }
-
-	bool operator ==(const State& temp) { return _name == temp._name; }
-
-	bool operator !=(const State& temp) { return _name != temp._name; }
-
-	bool operator >(const State& temp) { return _name < temp._name; }
-
-	bool operator <(const State& temp) { return _name > temp._name; }
-
-	bool operator >=(const State& temp) { return _name <= temp._name; }
-
-	bool operator <=(const State& temp) { return _name >= temp._name; }
-
-	friend ostream& operator<< (ostream& ustream, State& obj);
-
-private:
-	string _name;
-	string _capital;
-	string _language;
-	unsigned _population;
-	unsigned _area;
-};
-
-ostream& operator<< (ostream& ustream, State& obj) // Вывод объекта класса State
-{
-	if (&obj)
+	void printNode(Node<State>* node) // Метод вывода элемента дерева
 	{
-		cout << "State:\t\t" << obj._name << endl
-			 << "Capital:\t" << obj._capital << endl
-			 << "Language:\t" << obj._language << endl
-			 << "Population:\t" << obj._population << endl
-			 << "Area:\t\t" << obj._area << endl;
+		cout << "Key:\t\t" << node->data.getName() << endl << endl
+			 << "Data: " << endl << node->data;
 	}
 
-	return ustream;
-}
-
-class StateTree : public IteratedTree<State>
-{
-public:
-	StateTree() : IteratedTree<State>() {}
-
-	void printNode(Node<State>* node)
+	void print(TreeIterator<State> it)
 	{
-		cout << "Key:\t\t" << node->data.getName() << endl
-			 << "Data: " << endl << node->data << endl;
+		while (&(*(it))) // Пока не дошли до конца
+		{
+			auto current = it; 
 
-		cout << "-------------------------------" << endl;
-	}
+			if (!(&(*(++current)))) // Если элемент поддерева является максимальным
+			{
+				do // Проходим по поддереву
+				{
+					printNode(&(*it));
 
-	Node<State>* print(TreeIterator<State>* i)
-	{
-		auto d = (*i);
-
+					if (this->min() != &(*it))
+						cout << "----------------------------" << endl;
+				} while (&(*(--it)));
+			}
+			else // Если элемент поддерева не максимальный, то идем дальше 
+				it++;
+		}
 	}
 
 	string first(Node<State>* node) { return node->data.getName(); }
 	State second(Node<State>* node) { return node->data; }
+
+	TreeIterator<T> begin() { return TreeIterator<T>(this, this->min()); }
+	TreeIterator<T> end() { return TreeIterator<T>(this, this->max()); }
 };
 
 int main()
@@ -679,8 +739,9 @@ int main()
 		126,
 		1393
 	};
-
+	
 	map<string, unsigned> states;
+
 	for (size_t i = 0; i < name.size(); ++i)
 		states[name[i]] = population[i];
 
@@ -694,6 +755,7 @@ int main()
 		cout << "====================================" << endl;
 		cout << "Вывод элементов | Функция - print():" << endl;
 		cout << "====================================" << endl;
+
 		print(states);
 
 		cout << endl;
@@ -701,6 +763,7 @@ int main()
 		cout << "=================================================" << endl;
 		cout << "Поиск элемента | Функция findItem(): " << endl;
 		cout << "=================================================" << endl;
+
 		findItem(states, (string)"Russia", (unsigned)144);
 		cout << endl << "-------------------------------------------------" << endl;
 		findItem(states, (string)"China", (unsigned)83);
@@ -714,7 +777,9 @@ int main()
 		cout << "================================" << endl;
 		cout << "Фильтрация | Функция - filter(): " << endl;
 		cout << "================================" << endl;
+
 		map<string, unsigned> filteredStates = filter(states, threshold);
+
 		print(filteredStates);
 
 		cout << endl;
@@ -728,10 +793,12 @@ int main()
 		cout << endl;
 
 		cout << "========================================================" << endl;
-		cout << "Очередь с пиоритетом | Класс - MapPriorityQueue<>: " << endl;
+		cout << "Очередь с пиоритетом | Класс - MapPriorityQueue<>:" << endl;
 		cout << "========================================================" << endl;
+
 		MapPriorityQueue<string, unsigned> q;
 		pair<string, unsigned> tempPair("Brazil", 209);
+
 		q.push(states);
 		q.push(tempPair);
 		q.print();
@@ -739,7 +806,7 @@ int main()
 		cout << endl;
 
 		cout << "========================================================" << endl;
-		cout << "Первый элемент | Класс - MapPriorityQueue<> (top()): " << endl;
+		cout << "Первый элемент | Класс - MapPriorityQueue<> (top()):" << endl;
 		cout << "========================================================" << endl;
 		cout << "Key:\t" << q.top()->first << endl
 			<< "Value:\t" << q.top()->second << endl;
@@ -747,7 +814,7 @@ int main()
 		cout << endl;
 
 		cout << "========================================================" << endl;
-		cout << "Удаление элементов | Класс - MapPriorityQueue<> (pop()): " << endl;
+		cout << "Удаление элементов | Класс - MapPriorityQueue<> (pop()):" << endl;
 		cout << "========================================================" << endl;
 		q.pop();
 		q.pop();
@@ -762,21 +829,29 @@ int main()
 
 	cout << endl;
 
-	StateTree newStates;
+	IteratedTree<State> newStates;
 	vector<State> vStates =
 	{
-	   State("Russia", "Moscow", "Russian", 144, 17100),
-	   State("France", "Paris", "French", 67, 643),
-	   State("USA", "Washington DC", "English", 328, 9843),
-	   State("Germany", "Berlin", "German", 83, 357),
-	   State("Japan", "Tokyo", "Japanese", 126, 377),
-	   State("China", "Beijing", "Chinese", 1393, 9597)
+		State("Russia", "Moscow", "Russian", 144, 17100),
+		State("France", "Paris", "French", 67, 643),
+		State("USA", "Washington DC", "English", 328, 9843),
+		State("Germany", "Berlin", "German", 83, 357),
+		State("Japan", "Tokyo", "Japanese", 126, 377),
+		State("Armenia", "Yerevan", "Armenian", 3, 30),
+		State("Canada", "Ottawa", "English, French", 38, 9985),
+		State("Brazil", "Brasilia", "Portuguese", 210, 8516),
+		State("Italy", "Rome", "Italian", 60, 301),
+		State("China", "Beijing", "Chinese", 1393, 9597)
 	};
 
 	for (auto i : vStates)
 		newStates.insert(i);
 
-	newStates.printNode(newStates.max());
-	newStates.printNode(newStates.min());
-	newStates.printNode(newStates.getRoot());
+	TreeIterator<State> it(newStates.getRoot(), (AVL_Tree<State>*)(&newStates));
+
+	cout << "==============================================================================" << endl;
+	cout << "Вывод элементов дерева с помощью итератора | Класс - TreeIterator<> (print()):" << endl;
+	cout << "==============================================================================" << endl;
+
+	newStates.print(it); 
 }
