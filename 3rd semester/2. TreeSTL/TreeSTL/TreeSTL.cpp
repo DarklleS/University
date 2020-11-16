@@ -9,14 +9,12 @@ using namespace std;
 template<typename K, typename V>
 void print(const map<K, V>& inputMap) // Функция вывода элементов контейнера map
 {
-    auto i = inputMap.begin();
-
-    for (; i != inputMap.end(); ++i)
+    for (auto i : inputMap)
     {
-        cout << "Key:\t" << i->first << endl
-             << "Value:\t" << i->second;
+        cout << "Key:\t" << i.first << endl
+             << "Value:\t" << i.second;
         
-        if (i != --inputMap.cend())
+        if (i != *(--inputMap.cend()))
             cout << endl << "---------------" << endl;
     }
 
@@ -24,25 +22,46 @@ void print(const map<K, V>& inputMap) // Функция вывода элеме�
 }
 
 template<typename K, typename V>
-bool findItem(const map<K, V>& inputMap, const K& key, const V& value) // Функция поиска элемента в контейнере map
+bool findByKey(const map<K, V>& inputMap, const K& key) // Функция поиска элемента в контейнере map
 {
-    for (auto i : inputMap)
-        if (i.first == key && i.second == value)
-        {
-            cout << "Item: ["
-                 << "Key: " << key << " | "
-                 << "Value: " << value
-                 << "] - was found!";
+	try
+	{
+		inputMap.at(key);
 
-            return true;
-        }
+		cout << "Item with key: " << key << " was found!" << endl
+			 << "Value is: " << inputMap.at(key);
 
-    cout << "Item: ["
-         << "Key: " << key << " | "
-         << "Value: " << value
-         << "] - was not found!";
+		return true;
+	}
+	catch (const exception& ex)
+	{
+		cout << "Item with key: " << key << " was not found!";
 
-    return false;
+		return false;
+	}
+
+}
+
+template<typename K, typename V>
+bool findByValue(const map<K, V>& inputMap, const V& value) // Функция поиска элемента в контейнере map
+{
+	bool flag = false;
+
+	for (auto i : inputMap)
+	{
+		if (i.second == value)
+		{
+			cout << "Item with value: " << value << " was found!" << endl
+				 << "Key is: " << i.first << endl;
+
+			flag = true;
+		}
+	}
+
+	if (!flag)
+		cout << "Item with value: " << value << " was not found!";
+
+	return flag;
 }
 
 template<typename V>
@@ -58,117 +77,12 @@ map<K, V> filter(const map<K, V>& inputMap, bool (*f)(const V&)) // Функци
 
     for (auto i : inputMap)
     {
-        if (f(i.second))
-            newMap[i.first] = i.second;
+		if (f(i.second))
+			newMap.emplace(i);
     }
 
     return newMap;
 }
-
-template<typename K, typename V> 
-class MapPriorityQueue // Класс реализации очереди с приоритетом
-{
-public:
-    void push(map<K, V> inputMap)
-    {
-        for (auto i : inputMap)
-        {
-            if (_q.empty())
-                _q.push_back(i);
-            else
-            {
-                auto j = _q.cbegin();
-
-                if (_q.back().second > i.second) // Если вводимый элемент меньше, чем последний элемент очереди
-                    _q.push_back(i);
-                else if (_q.front().second < i.second) // Если вводимый элемент больше, чем первый элемент очереди
-                    _q.push_front(i);
-                else
-                {
-                    for (; j != _q.cend(); ++j)
-                    {
-                        if (j->second < i.second)  // Если значение численности населения вводимого элемента больше, чем значение текущего элеманта очереди
-                        {
-                            _q.insert(j, i);
-
-                            break;
-                        }
-                        else if (j->second == i.second) // Если значения численности населения элементов одинаковые
-                        {
-                            if (j->first < i.first) // Если имя вводимого элемента больше, чем имя текущего элеманта очереди
-                                _q.insert(++j, i);
-                            else if (j->first > i.first) // Если имя вводимого элемента мельше, чем имя текущего элеманта очереди
-                                _q.insert(j, i);
-
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    void push(pair<K, V> inputPair)
-    {
-        if (_q.empty())
-            _q.push_back(inputPair);
-        else
-        {
-            auto j = _q.cbegin();
-
-            if (_q.back().second > inputPair.second) // Если вводимый элемент меньше, чем последний элемент очереди
-                _q.push_back(inputPair);
-            else if (_q.front().second < inputPair.second) // Если вводимый элемент больше, чем первый элемент очереди
-                _q.push_front(inputPair);
-            else
-            {
-                for (; j != _q.cend(); ++j)
-                {
-                    if (j->second < inputPair.second)  // Если значение численности населения вводимого элемента больше, чем значение текущего элеманта очереди
-                    {
-                        _q.insert(j, inputPair);
-
-                        break;
-                    }
-                    else if (j->second == inputPair.second) // Если значения численности населения элементов одинаковые
-                    {
-                        if (j->first < inputPair.first) // Если имя вводимого элемента больше, чем имя текущего элеманта очереди
-                            _q.insert(++j, inputPair);
-                        else if (j->first > inputPair.first) // Если имя вводимого элемента мельше, чем имя текущего элеманта очереди
-                            _q.insert(j, inputPair);
-
-                        break;
-                    }
-                }
-            }
-        }
-    }
-
-    void pop()
-    {
-        if (!_q.empty())
-            _q.pop_front();
-    }
-
-    void print()
-    {
-        for (pair<K, V> i : _q)
-        {
-            cout << "Key:\t" << i.first << endl
-                 << "Value:\t" << i.second;
-
-            if (i != _q.back())
-                cout << endl << "---------------" << endl;
-        }
-
-        cout << endl;
-    }
-
-    const pair<K, V>* top() { return &_q.front(); }
-
-private:
-	list<pair<K, V>> _q;
-};
 
 class State // Класс реализации структуры "Государство" 
 {
@@ -220,14 +134,82 @@ ostream& operator<<(ostream& ustream, State& obj) // Вывод объекта �
 	if (&obj)
 	{
 		cout << "State:\t\t" << obj._name << endl
-			<< "Capital:\t" << obj._capital << endl
-			<< "Language:\t" << obj._language << endl
-			<< "Population:\t" << obj._population << endl
-			<< "Area:\t\t" << obj._area << endl;
+			 << "Capital:\t" << obj._capital << endl
+			 << "Language:\t" << obj._language << endl
+			 << "Population:\t" << obj._population << endl
+			 << "Area:\t\t" << obj._area << endl;
 	}
 
 	return ustream;
 }
+
+template<typename K, typename V> 
+class MapPriorityQueue // Класс реализации очереди с приоритетом
+{
+public:
+	MapPriorityQueue() {}
+
+	MapPriorityQueue(map<K, V>& temp) : _priorityMap(temp) {}
+
+	void push(const pair<const K, V>& temp) // Метод вставки нового элемента
+	{ 
+		_priorityMap.emplace(temp);
+
+		cout << "push() - " << temp.first << endl;
+
+		if (_priorityMap.size() != 1)
+			cout << "---------------------------" << endl;
+	}
+
+	void push(const K& key, const V& value) // Метод вставки нового элемента
+	{
+		_priorityMap.emplace(key, value);
+
+		cout << "push() - " << key << endl;
+		
+		if (_priorityMap.size() != 1)
+			cout << "---------------------------" << endl;
+	}
+
+	void pop() // Метод удаления элемента
+	{
+
+		if (!_priorityMap.size())
+			cout << "---------------------------" << endl;
+
+		cout << "pop() - " << (*(_priorityMap.cbegin())).first << endl;
+
+		if (_priorityMap.size())
+			cout << "---------------------------" << endl;
+
+		_priorityMap.erase(_priorityMap.cbegin());
+	}
+
+	void printTop() // Метод вывода верхнего элемента
+	{
+		auto temp = this->top().second;
+
+		cout << "Key: " << this->top().first << endl << endl
+			 << "Data: " << endl << temp;
+
+		if (_priorityMap.size() != 1)
+			cout << "---------------------------" << endl;
+	}
+
+	void print() // Метод вывода элементов
+	{
+		while (_priorityMap.size())
+		{
+			this->printTop();
+			this->pop();
+		}
+	}
+
+	const pair<const string, State> top() { return *(_priorityMap.cbegin()); }
+
+private:
+	map<K, V> _priorityMap;
+};
 
 template<class T>
 struct Node // Структура реализации узла бирного дерева 
@@ -603,7 +585,7 @@ protected:
 };
 
 template<typename T>
-class TreeIterator : public iterator<input_iterator_tag, T> // Класс реализации итератора дерева
+class TreeIterator : public iterator<input_iterator_tag, T>
 {
 public:
 	TreeIterator() :
@@ -675,7 +657,7 @@ private:
 };
 
 template<class T>
-class IteratedTree : public AVL_Tree<T> // Класс реализации интегрированного дерева
+class IteratedTree : public AVL_Tree<T>
 {
 public:
 	IteratedTree() : AVL_Tree<T>() {}
@@ -726,6 +708,7 @@ int main()
 		"France",
 		"USA",
 		"Germany",
+		"Austria",
 		"Japan",
 		"China"
 	};
@@ -736,6 +719,7 @@ int main()
 		67,
 		328,
 		83,
+		83,
 		126,
 		1393
 	};
@@ -743,7 +727,7 @@ int main()
 	map<string, unsigned> states;
 
 	for (size_t i = 0; i < name.size(); ++i)
-		states[name[i]] = population[i];
+		states.emplace(name[i], population[i]);
 
 	{
 		cout << "|--------------------------------|" << endl;
@@ -764,13 +748,13 @@ int main()
 		cout << "Поиск элемента | Функция findItem(): " << endl;
 		cout << "=================================================" << endl;
 
-		findItem(states, (string)"Russia", (unsigned)144);
+		findByKey(states, (string)"Russia");
 		cout << endl << "-------------------------------------------------" << endl;
-		findItem(states, (string)"China", (unsigned)83);
+		findByValue(states, (unsigned)83);
 		cout << endl << "-------------------------------------------------" << endl;
-		findItem(states, (string)"Brazil", (unsigned)126);
+		findByKey(states, (string)"Brazil");
 		cout << endl << "-------------------------------------------------" << endl;
-		findItem(states, (string)"Italy", (unsigned)837);
+		findByValue(states, (unsigned)101);
 
 		cout << endl << endl;
 
@@ -785,6 +769,24 @@ int main()
 		cout << endl;
 	}
 
+	vector<State> vStates =
+	{
+		State("Russia", "Moscow", "Russian", 144, 17100),
+		State("France", "Paris", "French", 67, 643),
+		State("USA", "Washington DC", "English", 328, 9843),
+		State("Germany", "Berlin", "German", 83, 357),
+		State("Japan", "Tokyo", "Japanese", 126, 377),
+		State("Canada", "Ottawa", "English, French", 38, 9985),
+		State("Brazil", "Brasilia", "Portuguese", 210, 8516),
+		State("Italy", "Rome", "Italian", 60, 301),
+		State("China", "Beijing", "Chinese", 1393, 9597)
+	};
+
+	map<string, State> mapStates;
+
+	for (auto i : vStates)
+		mapStates.emplace(i.getName(), i);
+
 	{
 		cout << "|--------------------------------|" << endl;
 		cout << "|========= ЗАДАНИЕ 1.2. =========|" << endl;
@@ -796,31 +798,15 @@ int main()
 		cout << "Очередь с пиоритетом | Класс - MapPriorityQueue<>:" << endl;
 		cout << "========================================================" << endl;
 
-		MapPriorityQueue<string, unsigned> q;
-		pair<string, unsigned> tempPair("Brazil", 209);
+		MapPriorityQueue<string, State> q(mapStates);
 
-		q.push(states);
-		q.push(tempPair);
-		q.print();
-
-		cout << endl;
-
-		cout << "========================================================" << endl;
-		cout << "Первый элемент | Класс - MapPriorityQueue<> (top()):" << endl;
-		cout << "========================================================" << endl;
-		cout << "Key:\t" << q.top()->first << endl
-			<< "Value:\t" << q.top()->second << endl;
-
-		cout << endl;
-
-		cout << "========================================================" << endl;
-		cout << "Удаление элементов | Класс - MapPriorityQueue<> (pop()):" << endl;
-		cout << "========================================================" << endl;
+		q.printTop();
+		q.pop();
+		q.push("Australia", State("Australia", "Canberra", "English", 25, 7692));
+		q.printTop();
 		q.pop();
 		q.pop();
 		q.print();
-
-		cout << endl;
 	}
 
 	cout << "|--------------------------------|" << endl;
@@ -830,19 +816,6 @@ int main()
 	cout << endl;
 
 	IteratedTree<State> newStates;
-	vector<State> vStates =
-	{
-		State("Russia", "Moscow", "Russian", 144, 17100),
-		State("France", "Paris", "French", 67, 643),
-		State("USA", "Washington DC", "English", 328, 9843),
-		State("Germany", "Berlin", "German", 83, 357),
-		State("Japan", "Tokyo", "Japanese", 126, 377),
-		State("Armenia", "Yerevan", "Armenian", 3, 30),
-		State("Canada", "Ottawa", "English, French", 38, 9985),
-		State("Brazil", "Brasilia", "Portuguese", 210, 8516),
-		State("Italy", "Rome", "Italian", 60, 301),
-		State("China", "Beijing", "Chinese", 1393, 9597)
-	};
 
 	for (auto i : vStates)
 		newStates.insert(i);
