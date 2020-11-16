@@ -26,10 +26,8 @@ bool findByKey(const map<K, V>& inputMap, const K& key) // Функция пои
 {
 	try
 	{
-		inputMap.at(key);
-
 		cout << "Item with key: " << key << " was found!" << endl
-			 << "Value is: " << inputMap.at(key);
+		     << "Value is: " << inputMap.at(key);
 
 		return true;
 	}
