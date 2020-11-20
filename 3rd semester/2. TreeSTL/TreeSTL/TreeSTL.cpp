@@ -3,83 +3,95 @@
 #include <list>
 #include <map>
 #include <queue>
+#include <utility>
+#include <cassert>
 
 using namespace std;
 
 template<typename K, typename V>
 void print(const map<K, V>& inputMap) // Функция вывода элементов контейнера map
 {
-    for (auto i : inputMap)
-    {
-        cout << "Key:\t" << i.first << endl
-             << "Value:\t" << i.second;
-        
-        if (i != *(--inputMap.cend()))
-            cout << endl << "---------------" << endl;
-    }
+	for (auto i : inputMap)
+	{
+		cout << "Key:\t" << i.first << endl
+			 << "Value:\t" << i.second;
 
-    cout << endl;
+		if (i != *(--inputMap.cend()))
+			cout << endl << "---------------" << endl;
+	}
+
+	cout << endl;
 }
 
 template<typename K, typename V>
-bool findByKey(const map<K, V>& inputMap, const K& key) // Функция поиска элемента в контейнере map
+pair<K, V>* findByKey(const map<K, V>& inputMap, const K& key) // Функция поиска элемента в контейнере map
 {
 	try
 	{
 		cout << "Item with key: " << key << " was found!" << endl
-		     << "Value is: " << inputMap.at(key);
+			 << "Value: " << inputMap.at(key) << endl;
 
-		return true;
+		return new pair<K, V>(key, inputMap.at(key));
 	}
-	catch (const exception& ex)
+	catch (const exception&)
 	{
-		cout << "Item with key: " << key << " was not found!";
+		cout << "Item with key: " << key << " was not found!" << endl;
 
-		return false;
+		return nullptr;
 	}
 
 }
 
 template<typename K, typename V>
-bool findByValue(const map<K, V>& inputMap, const V& value) // Функция поиска элемента в контейнере map
+vector<pair<K, V>>* findByValue(const map<K, V>& inputMap, const V& value) // Функция поиска элемента в контейнере map
 {
-	bool flag = false;
+	vector<pair<K, V>> result;
 
 	for (auto i : inputMap)
 	{
 		if (i.second == value)
 		{
-			cout << "Item with value: " << value << " was found!" << endl
-				 << "Key is: " << i.first << endl;
-
-			flag = true;
+			result.push_back(i);
 		}
 	}
 
-	if (!flag)
-		cout << "Item with value: " << value << " was not found!";
+	if (result.size())
+	{
+		cout << "Item with value: " << value << " was found!" << endl;
 
-	return flag;
+		for (size_t i = 0; i < result.size(); ++i)
+		{
+			cout << "Key " << i + 1 << ": " << result[i].first << endl;
+		}
+			
+		return &result;
+	}
+	else
+	{
+		cout << "Item with value: " << value << " was not found!" << endl;
+
+		return nullptr;
+	}
 }
 
 template<typename V>
 bool threshold(const V& value) // Предикат проверки порога численности населения
-{ 
-    return value > 100;
+{
+	return value > 100;
 }
 
 template<typename K, typename V>
 map<K, V> filter(const map<K, V>& inputMap, bool (*f)(const V&)) // Функция записи элементов контейнера map с определенным условием
 {
-    map<K, V> newMap;
+	map<K, V> newMap;
 
-    for (auto i : inputMap)
-    {
+	for (auto i : inputMap)
+	{
 		if (f(i.second))
 			newMap.emplace(i);
-    }
+	}
 
-    return newMap;
+	return newMap;
 }
 
 class State // Класс реализации структуры "Государство" 
@@ -92,18 +104,18 @@ public:
 		_population(0),
 		_area(0) {}
 
-	State(string name, string capital, string language, unsigned population, unsigned area) :
+	State(const string& name, const string& capital, const string& language, const unsigned& population, const unsigned& area) :
 		_name(name),
 		_capital(capital),
 		_language(language),
 		_population(population),
 		_area(area) {}
 
-	string getName() { return _name; }
-	string getCapital() { return _capital; }
-	string getLanguage() { return _language; }
-	unsigned getPopulation() { return _population; }
-	unsigned getArea() { return _area; }
+	const string& getName() { return _name; }
+	const string& getCapital() { return _capital; }
+	const string& getLanguage() { return _language; }
+	const unsigned& getPopulation() { return _population; }
+	const unsigned& getArea() { return _area; }
 
 	bool operator==(const State& temp) { return _name == temp._name; }
 
@@ -117,7 +129,7 @@ public:
 
 	bool operator<=(const State& temp) { return _name >= temp._name; }
 
-	friend ostream& operator<<(ostream& ustream, State& obj);
+	friend ostream& operator<<(ostream&, const State&);
 
 private:
 	string _name;
@@ -127,87 +139,41 @@ private:
 	unsigned _area;
 };
 
-ostream& operator<<(ostream& ustream, State& obj) // Вывод объекта класса State
+ostream& operator<<(ostream& ustream, const State& obj) // Вывод объекта класса State
 {
 	if (&obj)
 	{
 		cout << "State:\t\t" << obj._name << endl
-			 << "Capital:\t" << obj._capital << endl
-			 << "Language:\t" << obj._language << endl
-			 << "Population:\t" << obj._population << endl
-			 << "Area:\t\t" << obj._area << endl;
+			<< "Capital:\t" << obj._capital << endl
+			<< "Language:\t" << obj._language << endl
+			<< "Population:\t" << obj._population << endl
+			<< "Area:\t\t" << obj._area << endl;
 	}
 
 	return ustream;
 }
 
-template<typename K, typename V> 
-class MapPriorityQueue // Класс реализации очереди с приоритетом
+bool operator<(const pair<string, State>& left, const pair<string, State>& right) { return left.first > right.first; } // Перегрузка оператора < (pair)
+
+bool operator>(const pair<string, State>& left, const pair<string, State>& right) { return left.first < right.first; } // Перегрузка оператора > (pair) 
+
+bool operator==(const pair<string, State>& left, const pair<string, State>& right) { return left.first == right.first; }
+
+void printQueue(priority_queue<pair<string, State>>& q)
 {
-public:
-	MapPriorityQueue() {}
-
-	MapPriorityQueue(map<K, V>& temp) : _priorityMap(temp) {}
-
-	void push(const pair<const K, V>& temp) // Метод вставки нового элемента
-	{ 
-		_priorityMap.emplace(temp);
-
-		cout << "push() - " << temp.first << endl;
-
-		if (_priorityMap.size() != 1)
-			cout << "---------------------------" << endl;
-	}
-
-	void push(const K& key, const V& value) // Метод вставки нового элемента
+	while (!q.empty()) // Вывод элементов очереди с приоритетом (приоритет по ключам)
 	{
-		_priorityMap.emplace(key, value);
+		State value = q.top().second;
 
-		cout << "push() - " << key << endl;
-		
-		if (_priorityMap.size() != 1)
-			cout << "---------------------------" << endl;
+		cout << "Key:\t\t" << q.top().first << endl << endl
+			<< "Value:" << endl << value;
+
+		q.pop();
+
+		if (!q.empty())
+			cout << "----------------------------" << endl;
 	}
-
-	void pop() // Метод удаления элемента
-	{
-
-		if (!_priorityMap.size())
-			cout << "---------------------------" << endl;
-
-		cout << "pop() - " << (*(_priorityMap.cbegin())).first << endl;
-
-		if (_priorityMap.size())
-			cout << "---------------------------" << endl;
-
-		_priorityMap.erase(_priorityMap.cbegin());
-	}
-
-	void printTop() // Метод вывода верхнего элемента
-	{
-		auto temp = this->top().second;
-
-		cout << "Key: " << this->top().first << endl << endl
-			 << "Data: " << endl << temp;
-
-		if (_priorityMap.size() != 1)
-			cout << "---------------------------" << endl;
-	}
-
-	void print() // Метод вывода элементов
-	{
-		while (_priorityMap.size())
-		{
-			this->printTop();
-			this->pop();
-		}
-	}
-
-	const pair<const string, State> top() { return *(_priorityMap.cbegin()); }
-
-private:
-	map<K, V> _priorityMap;
-};
+}
 
 template<class T>
 struct Node // Структура реализации узла бирного дерева 
@@ -222,7 +188,7 @@ struct Node // Структура реализации узла бирного �
 		left(nullptr),
 		right(nullptr),
 		parent(nullptr),
-		data(NULL),
+		data(),
 		height(1) {}
 
 	Node<T>(T data) :
@@ -231,6 +197,10 @@ struct Node // Структура реализации узла бирного �
 		parent(nullptr),
 		data(data),
 		height(1) {}
+
+	bool operator<(const Node<T>& node) { return data < node.data; }
+
+	bool operator>(const Node<T>& node) { return data > node.data; }
 };
 
 template<class T>
@@ -241,7 +211,7 @@ public:
 
 	Node<T>* getRoot() { return _root; }
 
-	virtual void insert(T& key) { _insert(_root, new Node<T>(key)); }
+	virtual void insert(const T& key) { _insert(_root, new Node<T>(key)); }
 
 	virtual void remove(T& key) { _remove(_root, key); }
 
@@ -265,7 +235,7 @@ public:
 
 			if (key < current->data && current->left)
 				current = current->left;
-			else if (key > current->data && current->right)
+			else if (key > current->data&& current->right)
 				current = current->right;
 			else
 				return nullptr;
@@ -587,18 +557,18 @@ class TreeIterator : public iterator<input_iterator_tag, T>
 {
 public:
 	TreeIterator() :
-		_node(nullptr), 
+		_node(nullptr),
 		_tree(nullptr) {}
 
 	TreeIterator(Node<T>* node, AVL_Tree<T>* tree) :
-		_node(node), 
+		_node(node),
 		_tree(tree) {}
 
-	TreeIterator(const TreeIterator& i) : 
+	TreeIterator(const TreeIterator& i) :
 		_node(i._node),
 		_tree(i._tree) {}
 
-	TreeIterator<T>& operator=(const TreeIterator& i) 
+	TreeIterator<T>& operator=(const TreeIterator& i)
 	{
 		_node = i._node;
 		_tree = i._tree;
@@ -606,7 +576,7 @@ public:
 		return *this;
 	}
 
-	TreeIterator<T>& operator=(Node<T>* temp) 
+	TreeIterator<T>& operator=(Node<T>* temp)
 	{
 		_node = temp;
 
@@ -636,7 +606,7 @@ public:
 	}
 
 	TreeIterator<T>& operator--()
-	{ 
+	{
 		_node = _tree->predcessor(_node);
 
 		return *this;
@@ -662,74 +632,285 @@ public:
 
 	IteratedTree(const AVL_Tree<T>& tree) { this->_root = tree._root; }
 
-	void printNode(Node<State>* node) // Метод вывода элемента дерева
-	{
-		cout << "Key:\t\t" << node->data.getName() << endl << endl
-			 << "Data: " << endl << node->data;
-	}
-
-	void print(TreeIterator<State> it)
-	{
-		while (&(*(it))) // Пока не дошли до конца
-		{
-			auto current = it; 
-
-			if (!(&(*(++current)))) // Если элемент поддерева является максимальным
-			{
-				do // Проходим по поддереву
-				{
-					printNode(&(*it));
-
-					if (this->min() != &(*it))
-						cout << "----------------------------" << endl;
-				} while (&(*(--it)));
-			}
-			else // Если элемент поддерева не максимальный, то идем дальше 
-				it++;
-		}
-	}
-
 	string first(Node<State>* node) { return node->data.getName(); }
 	State second(Node<State>* node) { return node->data; }
 
 	TreeIterator<T> begin() { return TreeIterator<T>(this, this->min()); }
 	TreeIterator<T> end() { return TreeIterator<T>(this, this->max()); }
+
+	template<class T> friend ostream& operator<<(ostream&, IteratedTree<T>&);
 };
+
+template<class T>
+ostream& operator<<(ostream& ustream, IteratedTree<T>& obj)
+{
+	TreeIterator<T> it(obj.getRoot(), (AVL_Tree<T>*)(&obj));
+
+	while (&(*(it))) // Пока не дошли до конца
+	{
+		auto current = it;
+
+		if (!(&(*(++current)))) // Если элемент поддерева является максимальным
+		{
+			do // Проходим по поддереву
+			{
+				cout << "Key:\t\t" << (*it).data.first << endl << endl
+					 << "Data: " << endl << (*it).data.second;
+
+				if (obj.min() != &(*it))
+					ustream << "----------------------------" << endl;
+			} while (&(*(--it)));
+		}
+		else // Если элемент поддерева не максимальный, то идем дальше 
+			it++;
+	}
+
+	return ustream;
+}
+
+template<class T>
+class Heap
+{
+public:
+	Heap(const size_t& value) :
+		_array(new Node<T>[value]),
+		_size(0),
+		_capacity(value) {}
+
+	Node<T>* getLeft(const int& index) { return index < 0 || index * 2 >= _size ? nullptr : _array + (index * 2 + 1); }
+
+	Node<T>* getRight(const int& index) { return index < 0 || index * 2 >= _size ? nullptr : _array + (index * 2 + 2); }
+
+	Node<T>* getParent(const int& index)
+	{
+		if (index <= 0 || index >= _size)
+			return nullptr;
+
+		return index % 2 ? _array + (index / 2) : _array + (index / 2 - 1);
+	}
+
+	unsigned getLeftIndex(const int& index) { return index < 0 || index * 2 >= _size ? INT_MAX : index * 2 + 1; }
+
+	unsigned getRightIndex(const int& index) { return index < 0 || index * 2 >= _size ? INT_MAX : index * 2 + 2; }
+
+	unsigned getParentIndex(const int& index)
+	{
+		if (index <= 0 || index >= _size)
+			return INT_MAX;
+
+		return index % 2 == 0 ? index / 2 - 1 : index / 2;
+	}
+
+	unsigned getSize() { return _size; }
+
+	void insert(const T& data) { _insert(new Node<T>(data)); }
+
+	void remove(const T& data) { _remove(data); }
+
+	Node<T> extractMax()
+	{
+		Node<T> root = _array[0];
+
+		_array[0] = _array[_size - 1];
+		_size--;
+
+		_heapify(0);
+
+		return root;
+	}
+
+	void straight(void(*f)(Node<T>*))
+	{
+		for (size_t i = 0; i < _size; ++i)
+			f(&_array[i]);
+	}
+
+	void inorder() { _inorder(); }
+
+	void preorder() { _preorder(); }
+
+	void postorder() { _postorder(); }
+
+	Node<T>& operator[](const int& index)
+	{
+		assert(index >= 0 || index < _size);
+
+		return _array[index];
+	}
+
+	template<class T> friend ostream& operator<<(ostream&, Heap<T>&);
+
+private:
+	Node<T>* _array;
+	int _size;
+	int _capacity;
+
+	void _insert(Node<T>* node)
+	{
+		if (_size < _capacity)
+		{
+			_array[_size].data = node->data;
+			_size++;
+
+			_siftUp();
+		}
+	}
+
+	void _remove(T value)
+	{
+		if (!_size)
+			return;
+
+		int index = 0;
+
+		while (index < _size)
+		{
+			if (_array[index].data == value)
+				break;
+
+			index++;
+		}
+
+		if (index != _size)
+		{
+			swap(_array[index], _array[_size - 1]);
+
+			_size--;
+
+			_heapify(index);
+		}
+	}
+
+	void _siftUp(int index = -1)
+	{
+		if (index == -1)
+			index = _size - 1;
+
+		unsigned parent = getParentIndex(index);
+		unsigned newIndex = getLeftIndex(parent);
+
+		if (newIndex == index)
+			newIndex = getRightIndex(parent);
+
+		unsigned maxIndex = index;
+
+		if (index < _size && newIndex < _size && parent >= 0)
+		{
+			if (_array[index] > _array[newIndex])
+				maxIndex = index;
+
+			if (_array[index] < _array[newIndex])
+				maxIndex = newIndex;
+		}
+
+		if (parent < _size && parent >= 0 && _array[maxIndex] > _array[parent])
+		{
+			swap(_array[maxIndex], _array[parent]);
+			_siftUp(parent);
+		}
+	}
+
+	void _heapify(const unsigned& index)
+	{
+		unsigned largest = index;
+		unsigned left = getLeftIndex(index);
+		unsigned right = getRightIndex(index);
+
+		if (left < _size && right < _size && _array[left] > _array[largest])
+			largest = left;
+
+		if (right < _size && left < _size && _array[right] > _array[largest])
+			largest = right;
+
+		if (left < _size && right >= _size)
+			largest = left;
+
+		if (largest != index)
+		{
+			swap(_array[index], _array[largest]);
+			_heapify(largest);
+		}
+	}
+
+	void _inorder(int index = 0)
+	{
+		if (getLeftIndex(index) < _size)
+			_inorder(getLeftIndex(index));
+
+		if (index >= 0 && index < _size)
+			cout << _array[index].data << " ";
+
+		if (getRightIndex(index) < _size)
+			_inorder(getRightIndex(index));
+	}
+
+	void _preorder(int index = 0)
+	{
+		if (index >= 0 && index < _size)
+			cout << _array[index].data << " ";
+
+		if (getLeftIndex(index) < _size)
+			_preorder(getLeftIndex(index));
+
+		if (getRightIndex(index) < _size)
+			_preorder(getRightIndex(index));
+	}
+
+	void _postorder(int index = 0)
+	{
+		if (getLeftIndex(index) < _size)
+			_preorder(getLeftIndex(index));
+
+		if (getRightIndex(index) < _size)
+			_preorder(getRightIndex(index));
+
+		if (index >= 0 && index < _size)
+			cout << _array[index].data << " ";
+	}
+};
+
+template<class T>
+ostream& operator<<(ostream& ustream, Heap<T>& obj)
+{
+	Node<pair<string, State>> temp;
+
+	while (obj.getSize())
+	{
+		Node<pair<string, State>> temp = obj.extractMax();
+
+		ustream << "Key:\t\t" << temp.data.first << endl << endl
+			 << "Data:" << endl << temp.data.second;
+
+		if (obj.getSize())
+			ustream << "----------------------------" << endl;
+	}
+
+	return ustream;
+}
 
 int main()
 {
 	setlocale(LC_ALL, "Russian");
 
-	vector<string> name =
+	vector<pair<string, unsigned>> vStates = 
 	{
-		"Russia",
-		"France",
-		"USA",
-		"Germany",
-		"Austria",
-		"Japan",
-		"China"
+		pair<string, unsigned>("Russia", 144),
+		pair<string, unsigned>("France", 67),
+		pair<string, unsigned>("USA", 328),
+		pair<string, unsigned>("Germany", 83),
+		pair<string, unsigned>("Austria", 83),
+		pair<string, unsigned>("Japan", 126),
+		pair<string, unsigned>("China", 1393)
 	};
 
-	vector<unsigned> population =
-	{
-		144,
-		67,
-		328,
-		83,
-		83,
-		126,
-		1393
-	};
-	
-	map<string, unsigned> states;
+	map<string, unsigned> mStates;
 
-	for (size_t i = 0; i < name.size(); ++i)
-		states.emplace(name[i], population[i]);
+	for (auto i : vStates)
+		mStates.emplace(i);
 
 	{
 		cout << "|--------------------------------|" << endl;
-		cout << "|========= ЗАДАНИЕ 1.1. =========|" << endl;
+		cout << "|========= ЗАДАНИЕ 2.1. =========|" << endl;
 		cout << "|--------------------------------|" << endl;
 
 		cout << endl;
@@ -738,41 +919,42 @@ int main()
 		cout << "Вывод элементов | Функция - print():" << endl;
 		cout << "====================================" << endl;
 
-		print(states);
+		print(mStates);
 
 		cout << endl;
 
-		cout << "=================================================" << endl;
-		cout << "Поиск элемента | Функция findItem(): " << endl;
-		cout << "=================================================" << endl;
+		cout << "====================================================" << endl;
+		cout << "Поиск элемента | Функции findByKey(), findByValue():" << endl;
+		cout << "====================================================" << endl;
 
-		findByKey(states, (string)"Russia");
-		cout << endl << "-------------------------------------------------" << endl;
-		findByValue(states, (unsigned)83);
-		cout << endl << "-------------------------------------------------" << endl;
-		findByKey(states, (string)"Brazil");
-		cout << endl << "-------------------------------------------------" << endl;
-		findByValue(states, (unsigned)101);
+		findByKey(mStates, (string)"Russia");
+		cout << "-------------------------------------------------" << endl;
+		findByValue(mStates, (unsigned)83);
+		cout << "-------------------------------------------------" << endl;
+		findByKey(mStates, (string)"Brazil");
+		cout <<  "-------------------------------------------------" << endl;
+		findByValue(mStates, (unsigned)101);
 
-		cout << endl << endl;
+		cout << endl;
 
 		cout << "================================" << endl;
 		cout << "Фильтрация | Функция - filter(): " << endl;
 		cout << "================================" << endl;
 
-		map<string, unsigned> filteredStates = filter(states, threshold);
+		map<string, unsigned> filteredStates = filter(mStates, threshold);
 
 		print(filteredStates);
 
 		cout << endl;
 	}
 
-	vector<State> vStates =
+	vector<State> vNewStates =
 	{
 		State("Russia", "Moscow", "Russian", 144, 17100),
 		State("France", "Paris", "French", 67, 643),
 		State("USA", "Washington DC", "English", 328, 9843),
 		State("Germany", "Berlin", "German", 83, 357),
+		State("Armenia", "Yerevan", "Armenian", 3, 30),
 		State("Japan", "Tokyo", "Japanese", 126, 377),
 		State("Canada", "Ottawa", "English, French", 38, 9985),
 		State("Brazil", "Brasilia", "Portuguese", 210, 8516),
@@ -780,49 +962,63 @@ int main()
 		State("China", "Beijing", "Chinese", 1393, 9597)
 	};
 
-	map<string, State> mapStates;
+	map<string, State> mNewStates;
 
-	for (auto i : vStates)
-		mapStates.emplace(i.getName(), i);
+	for (auto i : vNewStates)
+		mNewStates.emplace(i.getName(), i);
 
 	{
 		cout << "|--------------------------------|" << endl;
-		cout << "|========= ЗАДАНИЕ 1.2. =========|" << endl;
+		cout << "|========= ЗАДАНИЕ 2.2. =========|" << endl;
 		cout << "|--------------------------------|" << endl;
 
 		cout << endl;
 
-		cout << "========================================================" << endl;
-		cout << "Очередь с пиоритетом | Класс - MapPriorityQueue<>:" << endl;
-		cout << "========================================================" << endl;
+		cout << "================================================" << endl;
+		cout << "Очередь с пиоритетом | Класс - priority_queue<>:" << endl;
+		cout << "================================================" << endl;
 
-		MapPriorityQueue<string, State> q(mapStates);
+		priority_queue<pair<string, State>> qStates;
 
-		q.printTop();
-		q.pop();
-		q.push("Australia", State("Australia", "Canberra", "English", 25, 7692));
-		q.printTop();
-		q.pop();
-		q.pop();
-		q.print();
+		for (auto i : mNewStates)
+			qStates.push((pair<string, State>) i);
+
+		printQueue(qStates);
+
+		cout << endl;
 	}
 
-	cout << "|--------------------------------|" << endl;
-	cout << "|========= ЗАДАНИЕ 1.3. =========|" << endl;
-	cout << "|--------------------------------|" << endl;
+	{
+		cout << "|--------------------------------|" << endl;
+		cout << "|========= ЗАДАНИЕ 2.3. =========|" << endl;
+		cout << "|--------------------------------|" << endl;
 
-	cout << endl;
+		cout << endl;
 
-	IteratedTree<State> newStates;
+		IteratedTree<pair<string, State>> tStates;
 
-	for (auto i : vStates)
-		newStates.insert(i);
+		for (auto i : vNewStates)
+			tStates.insert(pair<string, State>(i.getName(), i));
 
-	TreeIterator<State> it(newStates.getRoot(), (AVL_Tree<State>*)(&newStates));
+		cout << "====================================================================" << endl;
+		cout << "Вывод элементов дерева с помощью итератора | Класс - IteratedTree<>:" << endl;
+		cout << "====================================================================" << endl;
 
-	cout << "==============================================================================" << endl;
-	cout << "Вывод элементов дерева с помощью итератора | Класс - TreeIterator<> (print()):" << endl;
-	cout << "==============================================================================" << endl;
+		cout << tStates;
 
-	newStates.print(it); 
+		cout << endl;
+	}
+
+	{
+		cout << "|--------------------------------|" << endl;
+		cout << "|========= ЗАДАНИЕ 2.4. =========|" << endl;
+		cout << "|--------------------------------|" << endl;
+
+		Heap<pair<string, State>> hStates(vNewStates.size());
+
+		for (auto i : vNewStates)
+			hStates.insert(pair<string, State>(i.getName(), i));
+
+		cout << hStates;
+	}
 }
