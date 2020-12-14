@@ -12,7 +12,6 @@ public:
     {
         _rgbMatrix.resize(3, vector<vector<int>>(_size, vector<int>(_size)));
         _imageMatrix.resize(_size, vector<int>(_size));
-        _convolutionMatrix.resize(_size, vector<int>(_size));
 
         for (size_t i = 0; i < 3; ++i)
         {
