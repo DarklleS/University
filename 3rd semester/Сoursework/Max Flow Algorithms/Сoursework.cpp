@@ -331,7 +331,7 @@ void result(const vector<Edge<T>>& matrix, const Vertex& source, const Vertex& t
 
 int main()
 {
-    vector<Edge<int>> intEdges =
+    vector<Edge<int>> Edges =
     {
         Edge<int>(0, 1, 19),
         Edge<int>(0, 2, 5),
@@ -346,28 +346,9 @@ int main()
         Edge<int>(3, 2, 14)
     };
 
-    vector<Edge<double>> doubleEdges =
-    {
-        Edge<double>(0, 1, 22.943),
-        Edge<double>(0, 3, 9.8433),
-        Edge<double>(1, 0, 38.48943),
-        Edge<double>(1, 3, 81.4878),
-        Edge<double>(1, 6, 68.121),
-        Edge<double>(2, 3, 31.9435),
-        Edge<double>(3, 1, 25.31),
-        Edge<double>(3, 5, 34.0),
-        Edge<double>(5, 2, 566.92),
-        Edge<double>(5, 3, 27.823),
-        Edge<double>(4, 3, 13.2),
-        Edge<double>(4, 5, 20.001),
-        Edge<double>(4, 6, 93.6)
-    };
+    cout << "============================================================" << endl;
+    cout << "Graph:";
+    result(Edges, 0, 1);
+    cout << "============================================================" << endl;
 
-    cout << "============================================================" << endl;
-    cout << "Int Graph:";
-    result(intEdges, 0, 1);
-    cout << "============================================================" << endl;
-    cout << "Double Graph:";
-    result(doubleEdges, 1, 3);
-    cout << "============================================================" << endl;
 }
